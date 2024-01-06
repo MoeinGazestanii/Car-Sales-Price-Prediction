@@ -13,3 +13,4 @@ print(df)
 df.shape
 df.columns
 df.info()
+df.describe()
