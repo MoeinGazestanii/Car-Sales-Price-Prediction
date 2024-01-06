@@ -7,7 +7,7 @@ import seaborn as sb
 #Running the data
 
 df = pd.read_csv('C:\\Users\\Lenovo\\Desktop\\Car_details.csv')
-df
+print(df)
 
 # Basic Information
 df.shape
