@@ -10,7 +10,6 @@ import seaborn as sb
 
 df = pd.read_csv('C:\\Users\\Lenovo\\Desktop\\Car_details.csv')
 print(df)
-Fun.PercentageofMissingData(df)
 # Basic Information
 print(df.shape)     #The dataset contains 8128 samples and 13 columns.
 
@@ -40,7 +39,7 @@ df[df.duplicated()] #1189 dublicated rows
 df.drop_duplicates(inplace=True)
 
 #Data Preprocessing
-    def change(data, columns, string_to_replace, replacement):
+def change(data, columns, string_to_replace, replacement):
         for col in columns:
             data[col] = data[col].replace(string_to_replace, replacement,regex=True)
         return data
@@ -57,14 +56,21 @@ df['engine'] = pd.to_numeric(df['engine'])
 df['max_power'] = pd.to_numeric(df['max_power'])
 print(df.info())
 
-# Encoding seller type
 df_copy= df.copy()
-df_copy['seller_type'].replace({"Individual":0, "Dealer":1, "Trustmark Dealer": 2}, inplace= True)
-# Encoding Fuel
-df_copy['fuel'].replace({"CNG":0, "Diesel":1, "LPG": 2, "petrol":3}, inplace= True)
 
+# Encoding Fuel type
+df_copy['fuel'].replace({"CNG":"CNG/LPG", "LPG": "CNG/LPG"}, inplace= True)
 
+# Encoding Owner
+df_copy['owner'].replace({'Test Drive Car':0, 'First Owner':1, 'Second Owner':2, 'Third Owner':3, 'Fourth & Above Owner':3})
 
+df_copy1 = pd.get_dummies(df_copy[['fuel', 'transmission', 'seller_type']],drop_first=True)
+df_copy= pd.concat([df_copy, df_copy1], axis=1)
+print(df_copy.head())
+df_copy.drop(['fuel', 'transmission', 'seller_type'],axis=1, inplace=True)
+
+#drop some columns
+df_copy=df_copy.drop(columns=['torque','name'],axis=1)
 
 
 
