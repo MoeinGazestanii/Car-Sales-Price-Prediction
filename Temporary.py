@@ -13,7 +13,6 @@ print(df)
 
 
 # Basic Information
-print(df.shape)     #The dataset contains 8128 samples and 13 columns.
 
 print(df.columns)
 print(df.info())
@@ -26,7 +25,7 @@ num_rows, num_columns = df.shape
 # Print the number of rows and columns
 print(f"Number of rows: {num_rows}")
 print(f"Number of columns: {num_columns}")
-
+#The dataset contains 8128 samples and 13 columns.
 
 
 #numerical stats
@@ -83,7 +82,7 @@ df_copy=df_copy.drop(columns=['torque','name'],axis=1)
 
 
 #outlier Detection
-def detect_outliers_iqr(data):
+def detect_outliers(data):
     Q1 = np.percentile(data, 25)
     Q3 = np.percentile(data, 75)
     IQR = Q3 - Q1
@@ -96,21 +95,23 @@ def detect_outliers_iqr(data):
             outliers_indices.append(val)
     return outliers_indices
 
-outliers_km_driven = detect_outliers_iqr(df['km_driven'])
+outliers_km_driven = detect_outliers(df['km_driven'])
 print("Outliers detected in 'km_driven' column using IQR method:", outliers_km_driven)
 
-outliers_mileage = detect_outliers_iqr(df['mileage'])
+outliers_mileage = detect_outliers(df['mileage'])
 print("Outliers detected in 'mileage' column using IQR method:", outliers_mileage)
 
-outliers_engine = detect_outliers_iqr(df['engine'])
+outliers_engine = detect_outliers(df['engine'])
 print("Outliers detected in 'engine' column using IQR method:", outliers_engine)
 
-outliers_max_power = detect_outliers_iqr(df['max_power'])
+outliers_max_power = detect_outliers(df['max_power'])
 print("Outliers detected in 'max_power' column using IQR method:", outliers_max_power)
 
 #correlation
 correlation = df_copy.corr()
 print(correlation)
+plt.figure(figsize=(8,6))
+sb.heatmap(correlation, annot=True)
 
 #Basic Visualization of int and float columns
 
@@ -121,7 +122,7 @@ for col in df.columns:
 
 
 for column in numeric_columns:
-    plt.figure(figsize=(14, 6))  # Initialize the figure
+    plt.figure(figsize=(14, 6))
 
     # Plot histogram in the first subplot
     plt.subplot(1, 2, 1)
