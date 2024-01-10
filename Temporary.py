@@ -19,6 +19,12 @@ print(df.info())
 print(df.head(10))
 # "Selling_Price" will be the dependent variable and the rest of the variables will be considered as independent variables.
 
+
+#Number of cars in Dataset
+df['name'].value_counts()
+
+
+
 # Get the number of rows and columns
 num_rows, num_columns = df.shape
 
@@ -112,8 +118,43 @@ correlation = df_copy.corr()
 print(correlation)
 plt.figure(figsize=(8,6))
 sb.heatmap(correlation, annot=True)
+# Diesel and petrol are the most common type of fuels in this dataset and it is the reason of a strong correlation between the dummy variables for these fuel types.
+#There is a correlation between engine power and mileage for the car and its. However, it is a negative correlation.
+#Obviously, there is a negative correlation between the number of owners and year. The newer the car is, the fewer owners it tends to have.
+#There is a strong positive correlation between the max power of the car and our dependent variable selling price. so it is probably very effective in our model.
+# By correlation, year and engine would be other important factors in selling price.
 
-#Basic Visualization of int and float columns
+plt.figure(figsize=(10,6))
+plt.scatter(df_copy['max_power'], df_copy['selling_price'],label="Max Power")
+plt.scatter(df_copy['engine'], df_copy['selling_price'],label="Engine")
+plt.xlabel("max power & engine")
+plt.ylabel("selling price")
+plt.title("correlation of selling price with max power & engine")
+plt.legend()
+plt.show()
+
+
+plt.figure(figsize=(10,6))
+plt.scatter(df_copy['engine'], df_copy['mileage'])
+plt.xlabel("engine")
+plt.ylabel("mileage")
+plt.title("correlation of engine and mileage")
+plt.legend()
+plt.show()
+
+
+# Selling price of cars by year
+fig = plt.figure(figsize=(10, 20))
+
+plt.title('Selling price of cars by year')
+
+price_order = df.groupby('year')['selling_price'].mean().sort_values(ascending=False).index.values
+
+sb.boxplot(data=df, x='year', y='selling_price', order=price_order)
+
+
+
+# Visualization of int and float columns
 
 numeric_columns = []
 for col in df.columns:
@@ -126,7 +167,7 @@ for column in numeric_columns:
 
     # Plot histogram in the first subplot
     plt.subplot(1, 2, 1)
-    plt.hist(df[column], rwidth=0.5, bins=20, color='blue', alpha=0.7)
+    plt.hist(df[column], rwidth=0.5, bins=10, color='skyblue', alpha=0.7)
     plt.title(f"Histogram of {column}")
     plt.xlabel(column)
     plt.ylabel("Frequency")
@@ -167,6 +208,24 @@ for column in numeric_columns:
     plt.xlabel('Owner')
     plt.ylabel('Frequency')
     plt.show()
+
+
+
+#For an individual year, the sale price distribution looks like this:
+fig = plt.figure(figsize=(10, 5))
+plt.title("2015 sale price distributions")
+sb.distplot(df[df['year']==2015].selling_price)
+
+# Overview of data distributions
+sb.pairplot(df)
+sb.pairplot(df.iloc[:,1:4])
+
+
+
+
+
+
+
 
 
 
