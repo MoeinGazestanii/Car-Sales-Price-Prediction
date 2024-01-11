@@ -3,6 +3,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sb
+from sklearn.linear_model import LinearRegression
+
 
 
 
@@ -43,11 +45,11 @@ print(df.isna().sum())
 def PercentageofMissingData(dataset):
     return dataset.isna().sum()/len(dataset)*100
 
-PercentageofMissingData(df)
-# At most two percent of a variable contains missing values
+PercentageofMissingData(df)  # At most two percent of a variable contains missing values
 
 df.dropna(inplace=True, axis=0)
 
+# Dublicated rows
 df[df.duplicated()] #1189 dublicated rows
 df.drop_duplicates(inplace=True)
 
@@ -219,6 +221,47 @@ sb.distplot(df[df['year']==2015].selling_price)
 # Overview of data distributions
 sb.pairplot(df)
 sb.pairplot(df.iloc[:,1:4])
+
+# Train & Test
+percent_to_use = 0.8
+num_samples_to_use = int(len(df_copy) * percent_to_use)
+
+x = df_copy.drop("selling_price", axis=1)
+y = df_copy["selling_price"]
+
+x_train, y_train = x[:num_samples_to_use], y[:num_samples_to_use]
+x_test, y_test = x[num_samples_to_use:], y[num_samples_to_use:]
+
+print('x_train shape', x_train.shape)
+print('x_test shape', x_test.shape)
+print('y_train shape',y_train.shape)
+print('y_test shape',y_test.shape)
+
+# Regression
+reg= LinearRegression()
+reg.fit(x_train,y_train)
+reg.score(x_train,y_train)
+
+reg.coef_
+
+reg.intercept_
+
+prediction=reg.predict(x_test)
+
+reg_summary = pd.DataFrame(x_train.columns, columns=["Features"])
+reg_summary["Coefficients"] = reg.coef_
+reg_summary["Intercept"] = reg.intercept_
+print(reg_summary)
+
+
+from sklearn.metrics import mean_squared_error
+
+mse = mean_squared_error(y_test, prediction)
+print(f"Mean Squared Error: {mse}")
+
+
+
+
 
 
 
