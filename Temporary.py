@@ -3,8 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sb
-from sklearn.linear_model import LinearRegression
-
+import sklearn
 
 
 
@@ -24,7 +23,7 @@ print(df.head(10))
 
 #Number of cars in Dataset
 df['name'].value_counts()
-
+# A large proportion of cars are Maruti
 
 
 # Get the number of rows and columns
@@ -238,6 +237,8 @@ print('y_train shape',y_train.shape)
 print('y_test shape',y_test.shape)
 
 # Regression
+from sklearn.linear_model import LinearRegression
+
 reg= LinearRegression()
 reg.fit(x_train,y_train)
 reg.score(x_train,y_train)
@@ -246,46 +247,50 @@ reg.coef_
 
 reg.intercept_
 
-prediction=reg.predict(x_test)
+# Make predictions on the training set
+prediction=reg.predict(x_train)
+print((prediction))
+# Make predictions on the testing set
+prediction_test= reg.predict(x_test)
+print(prediction_test)
 
 reg_summary = pd.DataFrame(x_train.columns, columns=["Features"])
 reg_summary["Coefficients"] = reg.coef_
 reg_summary["Intercept"] = reg.intercept_
 print(reg_summary)
 
+plt.scatter(y_train, prediction, label='Training Data')
+plt.scatter(y_test, prediction_test, label='Testing Data')
+plt.plot([min(y_train), max(y_train)], [min(y_train), max(y_train)], '--k', label='Regression Line')
+plt.xlabel('Actual Values')
+plt.ylabel('Predicted Values')
+plt.legend()
+plt.show()
+
+
+# Polynomial Regression
+from sklearn.preprocessing import PolynomialFeatures
+
+poly = PolynomialFeatures(degree=2)
+
+X_train_poly = poly.fit_transform(x_train)
+X_test_poly = poly.transform(x_test)
+
+# Fit a linear regression model on the polynomial features
+model_2 = LinearRegression()
+model_2.fit(X_train_poly, y_train)
+
+model_2.score(X_train_poly,y_train) #0.85
+
+y_train_pred = model_2.predict(X_train_poly)
+
+y_test_pred = model_2.predict(X_test_poly)
+
+
 
 from sklearn.metrics import mean_squared_error
+train_mse = mean_squared_error(y_train, y_train_pred)
+test_mse = mean_squared_error(y_test, y_test_pred)
 
-mse = mean_squared_error(y_test, prediction)
-print(f"Mean Squared Error: {mse}")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+print(f"Train MSE: {train_mse}")
+print(f"Test MSE: {test_mse}")
