@@ -26,6 +26,18 @@ num_name = df['name'].value_counts()
 print(num_name)
 # A large proportion of cars are Maruti
 
+# Splitting the 'name' column into 'brand' and 'model' columns
+df_copyname= df.copy()
+df_copyname[['brand', 'model']] = df['name'].str.split(' ', n=1, expand=True)
+print(df_copyname)
+
+# The number of cars from each brand
+print(df_copyname['brand'].value_counts())
+
+# Pie chart of Brand percentage in dataset
+plt.pie(df_copyname['brand'].value_counts(), labels=df_copyname['brand'].value_counts().index, radius=1.5, autopct='%0.0f%%', shadow=True)
+plt.show()
+
 
 # Get the number of rows and columns
 num_rows, num_columns = df.shape
