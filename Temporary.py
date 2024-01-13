@@ -22,7 +22,8 @@ print(df.head(10))
 
 
 #Number of cars in Dataset
-df['name'].value_counts()
+num_name = df['name'].value_counts()
+print(num_name)
 # A large proportion of cars are Maruti
 
 
@@ -31,6 +32,7 @@ num_rows, num_columns = df.shape
 
 # Print the number of rows and columns
 print(f"Number of rows: {num_rows}")
+
 print(f"Number of columns: {num_columns}")
 #The dataset contains 8128 samples and 13 columns.
 
@@ -77,15 +79,18 @@ df_copy['fuel'].replace({"CNG":"CNG/LPG", "LPG": "CNG/LPG"}, inplace= True)
 
 # Encoding Owner
 df_copy['owner'].replace({'Test Drive Car':0, 'First Owner':1, 'Second Owner':2, 'Third Owner':3, 'Fourth & Above Owner':3}, inplace=True)
+# Changing type of owner
 df_copy['owner'] = pd.to_numeric(df_copy['owner'])
 
 df_copy1 = pd.get_dummies(df_copy[['fuel', 'transmission', 'seller_type']],drop_first=True)
 df_copy= pd.concat([df_copy, df_copy1], axis=1)
 print(df_copy.head())
+
+# Drop original columns
 df_copy.drop(['fuel', 'transmission', 'seller_type'],axis=1, inplace=True)
 
-#drop some columns
-df_copy=df_copy.drop(columns=['torque','name'],axis=1)
+#drop some unuseful columns in our model
+df_copy = df_copy.drop(columns=['torque','name'],axis=1)
 
 
 #outlier Detection
@@ -125,6 +130,7 @@ sb.heatmap(correlation, annot=True)
 #There is a strong positive correlation between the max power of the car and our dependent variable selling price. so it is probably very effective in our model.
 # By correlation, year and engine would be other important factors in selling price.
 
+# correlation of selling price with max power & engine plot
 plt.figure(figsize=(10,6))
 plt.scatter(df_copy['max_power'], df_copy['selling_price'],label="Max Power")
 plt.scatter(df_copy['engine'], df_copy['selling_price'],label="Engine")
@@ -134,13 +140,12 @@ plt.title("correlation of selling price with max power & engine")
 plt.legend()
 plt.show()
 
-
+# correlation of engine and mileage plot
 plt.figure(figsize=(10,6))
 plt.scatter(df_copy['engine'], df_copy['mileage'])
 plt.xlabel("engine")
 plt.ylabel("mileage")
 plt.title("correlation of engine and mileage")
-plt.legend()
 plt.show()
 
 
@@ -190,18 +195,21 @@ for column in numeric_columns:
     plt.title('Frequency of Transmission Types')
     plt.xlabel('Transmission Type')
     plt.ylabel('Frequency')
+
     plt.subplot(2,2,2)
     value_counts2 = df['seller_type'].value_counts()
     plt.bar(value_counts2.index, value_counts2.values, color='skyblue')
     plt.title('Frequency of Seller Types')
     plt.xlabel('Seller Type')
     plt.ylabel('Frequency')
+
     plt.subplot(2,2,3)
     value_counts3=df['fuel'].value_counts()
     plt.bar(value_counts3.index,value_counts3.values,color='skyblue')
     plt.title('Frequency of Fuel Types')
     plt.xlabel('Fuel Type')
     plt.ylabel('Frequency')
+
     plt.subplot(2,2,4)
     value_counts4 = df['owner'].value_counts()
     plt.bar(value_counts4.index, value_counts4.values, color='skyblue')
@@ -243,8 +251,9 @@ reg= LinearRegression()
 reg.fit(x_train,y_train)
 reg.score(x_train,y_train)
 
+# Coefficient
 reg.coef_
-
+# Intercept
 reg.intercept_
 
 # Make predictions on the training set
@@ -254,14 +263,16 @@ print((prediction))
 prediction_test= reg.predict(x_test)
 print(prediction_test)
 
+# Creating Table
 reg_summary = pd.DataFrame(x_train.columns, columns=["Features"])
 reg_summary["Coefficients"] = reg.coef_
 reg_summary["Intercept"] = reg.intercept_
 print(reg_summary)
 
+# Plot
 plt.scatter(y_train, prediction, label='Training Data')
 plt.scatter(y_test, prediction_test, label='Testing Data')
-plt.plot([min(y_train), max(y_train)], [min(y_train), max(y_train)], '--k', label='Regression Line')
+plt.plot([min(y_train), max(y_train)], [min(y_train), max(y_train)], linestyle='--', color='black', label='Regression Line')
 plt.xlabel('Actual Values')
 plt.ylabel('Predicted Values')
 plt.legend()
