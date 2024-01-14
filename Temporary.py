@@ -31,11 +31,16 @@ df_copyname= df.copy()
 df_copyname[['brand', 'model']] = df['name'].str.split(' ', n=1, expand=True)
 print(df_copyname)
 
-# The number of cars from each brand
 print(df_copyname['brand'].value_counts())
 
-# Pie chart of Brand percentage in dataset
-plt.pie(df_copyname['brand'].value_counts(), labels=df_copyname['brand'].value_counts().index, radius=1.5, autopct='%0.0f%%', shadow=True)
+dfbrand = df_copyname['brand'].value_counts().sort_values()
+first_10_items = dfbrand.head(12).index
+
+df_copyname['brand'] = df_copyname['brand'].apply(lambda x: 'other' if x in first_10_items else x)
+
+dfbrand_updated = df_copyname['brand'].value_counts().sort_values()
+
+plt.pie(dfbrand_updated, labels=dfbrand_updated.index, radius=1.3, autopct='%0.0f%%', shadow=True)
 plt.show()
 
 
@@ -90,7 +95,7 @@ df_copy= df.copy()
 df_copy['fuel'].replace({"CNG":"CNG/LPG", "LPG": "CNG/LPG"}, inplace= True)
 
 # Encoding Owner
-df_copy['owner'].replace({'Test Drive Car':0, 'First Owner':1, 'Second Owner':2, 'Third Owner':3, 'Fourth & Above Owner':3}, inplace=True)
+df_copy['owner'].replace({'Test Drive Car':0, 'First Owner':1, 'Second Owner':2, 'Third Owner':3, 'Fourth & Above Owner':4}, inplace=True)
 # Changing type of owner
 df_copy['owner'] = pd.to_numeric(df_copy['owner'])
 
@@ -119,17 +124,17 @@ def detect_outliers(data):
             outliers_indices.append(val)
     return outliers_indices
 
-outliers_km_driven = detect_outliers(df['km_driven'])
-print("Outliers detected in 'km_driven' column using IQR method:", outliers_km_driven)
+outliers_km_driven = len(detect_outliers(df['km_driven']))
+print("Number of Outliers detected in 'km_driven' column using IQR method:", outliers_km_driven)
 
-outliers_mileage = detect_outliers(df['mileage'])
-print("Outliers detected in 'mileage' column using IQR method:", outliers_mileage)
+outliers_mileage = len(detect_outliers(df['mileage']))
+print("Number of Outliers detected in 'mileage' column using IQR method:", outliers_mileage)
 
-outliers_engine = detect_outliers(df['engine'])
-print("Outliers detected in 'engine' column using IQR method:", outliers_engine)
+outliers_engine = len(detect_outliers(df['engine']))
+print("Number of Outliers detected in 'engine' column using IQR method:", outliers_engine)
 
-outliers_max_power = detect_outliers(df['max_power'])
-print("Outliers detected in 'max_power' column using IQR method:", outliers_max_power)
+outliers_max_power = len(detect_outliers(df['max_power']))
+print("Number of Outliers detected in 'max_power' column using IQR method:", outliers_max_power)
 
 #correlation
 correlation = df_copy.corr()
@@ -151,6 +156,7 @@ plt.ylabel("selling price")
 plt.title("correlation of selling price with max power & engine")
 plt.legend()
 plt.show()
+
 
 # correlation of engine and mileage plot
 plt.figure(figsize=(10,6))
@@ -199,36 +205,36 @@ for column in numeric_columns:
     plt.show()
 
 
-    # Categorical values visualization
-    plt.figure(figsize=(8, 6))
-    plt.subplot(2,2,1)
-    value_counts = df['transmission'].value_counts()
-    plt.bar(value_counts.index, value_counts.values, color='skyblue')
-    plt.title('Frequency of Transmission Types')
-    plt.xlabel('Transmission Type')
-    plt.ylabel('Frequency')
+# Categorical values visualization
+plt.figure(figsize=(8, 6))
+plt.subplot(2,2,1)
+value_counts = df['transmission'].value_counts()
+plt.bar(value_counts.index, value_counts.values, color='skyblue')
+plt.title('Frequency of Transmission Types')
+plt.xlabel('Transmission Type')
+plt.ylabel('Frequency')
 
-    plt.subplot(2,2,2)
-    value_counts2 = df['seller_type'].value_counts()
-    plt.bar(value_counts2.index, value_counts2.values, color='skyblue')
-    plt.title('Frequency of Seller Types')
-    plt.xlabel('Seller Type')
-    plt.ylabel('Frequency')
+plt.subplot(2,2,2)
+value_counts2 = df['seller_type'].value_counts()
+plt.bar(value_counts2.index, value_counts2.values, color='skyblue')
+plt.title('Frequency of Seller Types')
+plt.xlabel('Seller Type')
+plt.ylabel('Frequency')
 
-    plt.subplot(2,2,3)
-    value_counts3=df['fuel'].value_counts()
-    plt.bar(value_counts3.index,value_counts3.values,color='skyblue')
-    plt.title('Frequency of Fuel Types')
-    plt.xlabel('Fuel Type')
-    plt.ylabel('Frequency')
+plt.subplot(2,2,3)
+value_counts3=df['fuel'].value_counts()
+plt.bar(value_counts3.index,value_counts3.values,color='skyblue')
+plt.title('Frequency of Fuel Types')
+plt.xlabel('Fuel Type')
+plt.ylabel('Frequency')
 
-    plt.subplot(2,2,4)
-    value_counts4 = df['owner'].value_counts()
-    plt.bar(value_counts4.index, value_counts4.values, color='skyblue')
-    plt.title('Frequency of Owners')
-    plt.xlabel('Owner')
-    plt.ylabel('Frequency')
-    plt.show()
+plt.subplot(2,2,4)
+value_counts4 = df['owner'].value_counts()
+plt.bar(value_counts4.index, value_counts4.values, color='skyblue')
+plt.title('Frequency of Owners')
+plt.xlabel('Owner')
+plt.ylabel('Frequency')
+plt.show()
 
 
 
@@ -238,8 +244,7 @@ plt.title("2015 sale price distributions")
 sb.distplot(df[df['year']==2015].selling_price)
 
 # Overview of data distributions
-sb.pairplot(df)
-sb.pairplot(df.iloc[:,1:4])
+sb.pairplot(df.iloc[:,1:9])
 
 # Train & Test
 percent_to_use = 0.8
@@ -258,10 +263,11 @@ print('y_test shape',y_test.shape)
 
 # Regression
 from sklearn.linear_model import LinearRegression
+from sklearn.metrics import   mean_squared_error
 
 reg= LinearRegression()
 reg.fit(x_train,y_train)
-reg.score(x_train,y_train)
+reg.score(x_test,y_test)
 
 # Coefficient
 reg.coef_
@@ -274,6 +280,9 @@ print((prediction))
 # Make predictions on the testing set
 prediction_test= reg.predict(x_test)
 print(prediction_test)
+
+mean_squared_error(y_test,prediction_test)
+np.sqrt(mean_squared_error(y_test,prediction_test))
 
 # Creating Table
 reg_summary = pd.DataFrame(x_train.columns, columns=["Features"])
@@ -309,11 +318,3 @@ y_train_pred = model_2.predict(X_train_poly)
 
 y_test_pred = model_2.predict(X_test_poly)
 
-
-
-from sklearn.metrics import mean_squared_error
-train_mse = mean_squared_error(y_train, y_train_pred)
-test_mse = mean_squared_error(y_test, y_test_pred)
-
-print(f"Train MSE: {train_mse}")
-print(f"Test MSE: {test_mse}")
