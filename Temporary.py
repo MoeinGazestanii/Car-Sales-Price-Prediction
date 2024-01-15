@@ -4,9 +4,20 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sb
 import sklearn
+import streamlit as st
+import os
+st.set_page_config(
+    page_title="Used Cars Project",
+    page_icon=":car:",
+    layout="wide",
+)
+st.image('C:\\Users\\Lenovo\\PycharmProjects\\pythonProject1\\Car-Sales-Price-Prediction\\buying-a-used-car.jpg', width=800)
+image_path = os.path.abspath('C:\\Users\\Lenovo\\PycharmProjects\\pythonProject1\\Car-Sales-Price-Prediction\\buying-a-used-car.jpg')
+st.image(image_path)
 
-
-
+st.title('Used Cars Project')
+st.write('The dataset contains information for predicting the selling price of used cars based on various factors such as mileage, engine power, number of seats, number of previous owners, and more. ')
+st.write('The dataset was obtained from Kaggle. The URL for the dataset is https://www.kaggle.com/datasets/nehalbirla/vehicle-dataset-from-cardekho?select=Car+details+v3.csv')
 #Running the data
 
 df = pd.read_csv('C:\\Users\\Lenovo\\Desktop\\Car_details.csv')
@@ -14,16 +25,40 @@ print(df)
 
 
 # Basic Information
+st.header('Dataset Information')
+if st.button('Show Dataset'):
+    st.dataframe(df)
 
 print(df.columns)
 print(df.info())
 print(df.head(10))
 # "Selling_Price" will be the dependent variable and the rest of the variables will be considered as independent variables.
+st.write("Selling_Price will be the dependent variable and the rest of the variables will be considered as independent variables.")
+st.sidebar.title('Variables table')
+st.sidebar.write(pd.read_csv('C:\\Users\\Lenovo\\Desktop\\Car_details.csv').iloc[5:,[0,4]].reset_index(drop=True))
 
+# Get the number of rows and columns
+num_rows, num_columns = df.shape
+
+# Print the number of rows and columns
+st.write(f"Number of rows: {df.shape[0]}")
+st.write(f"Number of columns: {df.shape[1]}")
+print(f"Number of rows: {num_rows}")
+
+print(f"Number of columns: {num_columns}")
+#The dataset contains 8128 samples and 13 columns.
 
 #Number of cars in Dataset
 num_name = df['name'].value_counts()
 print(num_name)
+
+st.subheader('Cars Proportion')
+show_num_cars = st.checkbox('Number of Cars')
+# Display the number of cars if the checkbox is checked
+if show_num_cars:
+    num_name = df['name'].value_counts()
+    st.write(num_name)
+st.write('A large proportion of cars are Maruti')
 # A large proportion of cars are Maruti
 
 # Splitting the 'name' column into 'brand' and 'model' columns
@@ -42,30 +77,44 @@ dfbrand_updated = df_copyname['brand'].value_counts().sort_values()
 
 plt.pie(dfbrand_updated, labels=dfbrand_updated.index, radius=1.3, autopct='%0.0f%%', shadow=True)
 plt.show()
+# Create a checkbox to show/hide the pie chart
+show_pie_chart = st.checkbox('Show Pie Chart')
+# Display the pie chart if the checkbox is checked
+if show_pie_chart:
+    threshold_percentage = 3
+    total_count = dfbrand_updated.sum()
+    brand_counts_filtered = dfbrand_updated[dfbrand_updated / total_count * 100 >= threshold_percentage]
+
+    # Plot the pie chart
+    fig, ax = plt.subplots()
+    ax.pie(brand_counts_filtered, labels=brand_counts_filtered.index, radius=1.3, autopct='%0.0f%%', shadow=True)
+
+    # Display the plot using st.pyplot
+    st.pyplot(fig)
+    plt.close()
 
 
-# Get the number of rows and columns
-num_rows, num_columns = df.shape
-
-# Print the number of rows and columns
-print(f"Number of rows: {num_rows}")
-
-print(f"Number of columns: {num_columns}")
-#The dataset contains 8128 samples and 13 columns.
-
+st.subheader('Numerical stats')
 
 #numerical stats
+if st.button('Describe'):
+    st.write(df.describe())
 print(df.describe())
 
 #missing values
 print(df.isna().sum())
 
+
+st.subheader("Missing Values")
 def PercentageofMissingData(dataset):
     return dataset.isna().sum()/len(dataset)*100
+if st.checkbox("Percentage of Missing values"):
+    st.write(PercentageofMissingData(df))
+st.text('At most two percent of a variable contains missing values')
 
-PercentageofMissingData(df)  # At most two percent of a variable contains missing values
 
 df.dropna(inplace=True, axis=0)
+st.subheader("Dublicated rows")
 
 # Dublicated rows
 df[df.duplicated()] #1189 dublicated rows
@@ -318,3 +367,16 @@ y_train_pred = model_2.predict(X_train_poly)
 
 y_test_pred = model_2.predict(X_test_poly)
 
+from sklearn.pipeline import make_pipeline
+model = make_pipeline(PolynomialFeatures(2), LinearRegression())
+model.fit(x_train, y_train)
+y_pred = model.predict(x_test)
+model.score(x_test,y_test)
+
+fig = plt.figure(figsize=(12,10))
+plt.scatter(y_test, y_pred)
+plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'k--', lw=4)
+plt.xlabel("Actual Prices")
+plt.ylabel("Predicted Prices")
+plt.title("Actual Prices vs Predicted Prices")
+plt.show()
