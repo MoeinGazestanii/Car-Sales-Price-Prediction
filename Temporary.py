@@ -11,9 +11,8 @@ st.set_page_config(
     page_icon=":car:",
     layout="wide",
 )
-st.image('C:\\Users\\Lenovo\\PycharmProjects\\pythonProject1\\Car-Sales-Price-Prediction\\buying-a-used-car.jpg', width=800)
-image_path = os.path.abspath('C:\\Users\\Lenovo\\PycharmProjects\\pythonProject1\\Car-Sales-Price-Prediction\\buying-a-used-car.jpg')
-st.image(image_path)
+st.image('buying-a-used-car.jpg',width=500)
+
 
 st.title('Used Cars Project')
 st.write('The dataset contains information for predicting the selling price of used cars based on various factors such as mileage, engine power, number of seats, number of previous owners, and more. ')
@@ -69,29 +68,18 @@ print(df_copyname)
 print(df_copyname['brand'].value_counts())
 
 dfbrand = df_copyname['brand'].value_counts().sort_values()
-first_10_items = dfbrand.head(12).index
+first_10_items = dfbrand.head(20).index
 
 df_copyname['brand'] = df_copyname['brand'].apply(lambda x: 'other' if x in first_10_items else x)
 
 dfbrand_updated = df_copyname['brand'].value_counts().sort_values()
 
-plt.pie(dfbrand_updated, labels=dfbrand_updated.index, radius=1.3, autopct='%0.0f%%', shadow=True)
-plt.show()
-# Create a checkbox to show/hide the pie chart
 show_pie_chart = st.checkbox('Show Pie Chart')
-# Display the pie chart if the checkbox is checked
 if show_pie_chart:
-    threshold_percentage = 3
-    total_count = dfbrand_updated.sum()
-    brand_counts_filtered = dfbrand_updated[dfbrand_updated / total_count * 100 >= threshold_percentage]
-
-    # Plot the pie chart
-    fig, ax = plt.subplots()
-    ax.pie(brand_counts_filtered, labels=brand_counts_filtered.index, radius=1.3, autopct='%0.0f%%', shadow=True)
-
-    # Display the plot using st.pyplot
-    st.pyplot(fig)
-    plt.close()
+    fig=plt.figure(figsize=(10,6))
+    plt.pie(dfbrand_updated, labels=dfbrand_updated.index, radius=1.3, autopct='%0.0f%%', shadow=True)
+    st.write(fig)
+# Create a checkbox to show/hide the pie chart
 
 
 st.subheader('Numerical stats')
@@ -115,11 +103,10 @@ st.text('At most two percent of a variable contains missing values')
 
 df.dropna(inplace=True, axis=0)
 st.subheader("Dublicated rows")
-
 # Dublicated rows
 df[df.duplicated()] #1189 dublicated rows
 df.drop_duplicates(inplace=True)
-
+st.write("Number of duplicated rows:", len(df.duplicated()))
 #Data Preprocessing
 def change(data, columns, string_to_replace, replacement):
         for col in columns:
@@ -158,7 +145,7 @@ df_copy.drop(['fuel', 'transmission', 'seller_type'],axis=1, inplace=True)
 #drop some unuseful columns in our model
 df_copy = df_copy.drop(columns=['torque','name'],axis=1)
 
-
+st.write('The data is preprocessed by encoding the target variable into numerical values and converting categorical variables into dummy variables.')
 #outlier Detection
 def detect_outliers(data):
     Q1 = np.percentile(data, 25)
