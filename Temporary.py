@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import seaborn as sb
 import sklearn
 import streamlit as st
-import os
+
 st.set_page_config(
     page_title="Used Cars Project",
     page_icon=":car:",
@@ -74,12 +74,12 @@ df_copyname['brand'] = df_copyname['brand'].apply(lambda x: 'other' if x in firs
 
 dfbrand_updated = df_copyname['brand'].value_counts().sort_values()
 
+# Create a checkbox to show/hide the pie chart
 show_pie_chart = st.checkbox('Show Pie Chart')
 if show_pie_chart:
     fig=plt.figure(figsize=(10,6))
     plt.pie(dfbrand_updated, labels=dfbrand_updated.index, radius=1.3, autopct='%0.0f%%', shadow=True)
     st.write(fig)
-# Create a checkbox to show/hide the pie chart
 
 
 st.subheader('Numerical stats')
@@ -144,7 +144,7 @@ df_copy.drop(['fuel', 'transmission', 'seller_type'],axis=1, inplace=True)
 
 #drop some unuseful columns in our model
 df_copy = df_copy.drop(columns=['torque','name'],axis=1)
-
+st.header("Dataset Preprocessing")
 st.write('The data is preprocessed by encoding the target variable into numerical values and converting categorical variables into dummy variables.')
 #outlier Detection
 def detect_outliers(data):
@@ -159,26 +159,44 @@ def detect_outliers(data):
         if val < lower_bound or val > upper_bound:
             outliers_indices.append(val)
     return outliers_indices
-
+st.subheader("Outlier Detection")
 outliers_km_driven = len(detect_outliers(df['km_driven']))
 print("Number of Outliers detected in 'km_driven' column using IQR method:", outliers_km_driven)
-
+st.write("Number of Outliers detected in 'km_driven' column using IQR method:",outliers_km_driven)
 outliers_mileage = len(detect_outliers(df['mileage']))
 print("Number of Outliers detected in 'mileage' column using IQR method:", outliers_mileage)
+st.write("Number of Outliers detected in 'mileage' column using IQR method:",outliers_mileage)
 
 outliers_engine = len(detect_outliers(df['engine']))
 print("Number of Outliers detected in 'engine' column using IQR method:", outliers_engine)
+st.write("Number of Outliers detected in 'engine' column using IQR method:",outliers_engine)
 
 outliers_max_power = len(detect_outliers(df['max_power']))
 print("Number of Outliers detected in 'max_power' column using IQR method:", outliers_max_power)
-
+st.write("Number of Outliers detected in 'max_power' column using IQR method:",outliers_max_power)
+st.header("Data Exploration")
+with st.expander("Detail"):
+    st.write('The target variable and features are plotted to explore data distribution and correlation.')
 #correlation
 correlation = df_copy.corr()
 print(correlation)
 plt.figure(figsize=(8,6))
 sb.heatmap(correlation, annot=True)
+st.subheader("Correlation")
+Heatmap = st.checkbox("Heatmap")
+if Heatmap:
+    fig1 = plt.figure(figsize=(10, 6))
+    sb.heatmap(correlation, annot=True)
+    st.write(fig1)
+
+with st.expander("Outcome"):
+    st.write('- Diesel and petrol are the most common type of fuels in this dataset and it is the reason of a strong correlation between the dummy variables for these fuel types.')
+    st.write('- There is a correlation between engine power and mileage. However, it is a negative correlation.')
+    st.write('- Obviously, there is a negative correlation between the number of owners and year. The newer the car is, the fewer owners it tends to have.')
+    st.write('- There is a strong positive correlation between the maximum  power of the car and our dependent variable selling price. so it is probably very effective in our model.')
+    st.write('- By correlation, year and engine would be other important factors in selling price.')
 # Diesel and petrol are the most common type of fuels in this dataset and it is the reason of a strong correlation between the dummy variables for these fuel types.
-#There is a correlation between engine power and mileage for the car and its. However, it is a negative correlation.
+#There is a correlation between engine power and mileage. However, it is a negative correlation.
 #Obviously, there is a negative correlation between the number of owners and year. The newer the car is, the fewer owners it tends to have.
 #There is a strong positive correlation between the max power of the car and our dependent variable selling price. so it is probably very effective in our model.
 # By correlation, year and engine would be other important factors in selling price.
@@ -193,15 +211,44 @@ plt.title("correlation of selling price with max power & engine")
 plt.legend()
 plt.show()
 
-
 # correlation of engine and mileage plot
-plt.figure(figsize=(10,6))
+plt.figure(figsize=(10, 6))
 plt.scatter(df_copy['engine'], df_copy['mileage'])
 plt.xlabel("engine")
 plt.ylabel("mileage")
 plt.title("correlation of engine and mileage")
 plt.show()
 
+# Selectbox to choose the plot
+selected_plot = st.selectbox("Select Plot", ["Correlation with Max Power & Engine", "Correlation of Engine and Mileage","Selling Price by Year"])
+
+# Plot based on the selection
+if selected_plot == "Correlation with Max Power & Engine":
+    if st.button("Show Correlation Plot"):
+        fig = plt.figure(figsize=(10, 6))
+        plt.scatter(df_copy['max_power'], df_copy['selling_price'], label="Max Power")
+        plt.scatter(df_copy['engine'], df_copy['selling_price'], label="Engine")
+        plt.xlabel("Max Power & Engine")
+        plt.ylabel("Selling Price")
+        plt.title("Correlation of Selling Price with Max Power & Engine")
+        plt.legend()
+        st.pyplot(fig)
+
+elif selected_plot == "Correlation of Engine and Mileage":
+    if st.button("Show Correlation Plot"):
+        fig = plt.figure(figsize=(10, 6))
+        plt.scatter(df_copy['engine'], df_copy['mileage'])
+        plt.xlabel("Engine")
+        plt.ylabel("Mileage")
+        plt.title("Correlation of Engine and Mileage")
+        st.pyplot(fig)
+elif selected_plot == "Selling Price by Year":
+    if st.button("Show Selling Price by Year Plot"):
+        fig = plt.figure(figsize=(20,10))
+        plt.title('Selling price of cars by year')
+        price_order = df_copy.groupby('year')['selling_price'].mean().sort_values(ascending=False).index.values
+        sb.boxplot(data=df_copy, x='year', y='selling_price', order=price_order)
+        st.pyplot(fig)
 
 # Selling price of cars by year
 fig = plt.figure(figsize=(10, 20))
@@ -213,7 +260,7 @@ price_order = df.groupby('year')['selling_price'].mean().sort_values(ascending=F
 sb.boxplot(data=df, x='year', y='selling_price', order=price_order)
 
 
-
+st.subheader("Visualization of int and float columns")
 # Visualization of int and float columns
 
 numeric_columns = []
@@ -240,7 +287,28 @@ for column in numeric_columns:
     plt.ylabel("Values")
     plt.show()
 
+selected_column = st.selectbox("Select Numeric Column", df.select_dtypes(['float64', 'int64']).columns)
 
+# Button to trigger the visualization
+if st.button(f"Visualize {selected_column}"):
+    # Create a figure and axis
+    fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+
+    # Plot histogram in the first subplot
+    axes[0].hist(df[selected_column], rwidth=0.5, bins=10, color='skyblue', alpha=0.7)
+    axes[0].set_title(f"Histogram of {selected_column}")
+    axes[0].set_xlabel(selected_column)
+    axes[0].set_ylabel("Frequency")
+
+    # Plot horizontal box plot in the second subplot
+    axes[1].boxplot(df[selected_column], vert=False)
+    axes[1].set_title(f"Horizontal Boxplot of {selected_column}")
+    axes[1].set_xlabel(selected_column)
+    axes[1].set_ylabel("Values")
+    # Show the plots
+    st.pyplot(fig)
+
+st.subheader("Categorical values visualization")
 # Categorical values visualization
 plt.figure(figsize=(8, 6))
 plt.subplot(2,2,1)
@@ -272,15 +340,49 @@ plt.xlabel('Owner')
 plt.ylabel('Frequency')
 plt.show()
 
+exclude_columns = ["name","torque"]
+categorical_columns = [col for col in df.select_dtypes('object').columns if col not in exclude_columns]
 
+# Selectbox to choose the categorical column
+selected_column = st.selectbox("Select Categorical Column", categorical_columns)
+
+# Button to trigger the visualization
+if st.button(f"Visualize Frequency of {selected_column}"):
+    # Plot frequency of the selected categorical column
+    value_counts = df[selected_column].value_counts()
+
+    fig, ax = plt.subplots(figsize=(8, 6))
+    ax.bar(value_counts.index, value_counts.values, color='skyblue')
+    ax.set_title(f'Frequency of {selected_column}')
+    ax.set_xlabel(selected_column)
+    ax.set_ylabel('Frequency')
+
+    # Show the plots
+    st.pyplot(fig)
 
 #For an individual year, the sale price distribution looks like this:
 fig = plt.figure(figsize=(10, 5))
 plt.title("2015 sale price distributions")
 sb.distplot(df[df['year']==2015].selling_price)
 
+show_distribution_plot = st.checkbox('Show 2019 Sale Price Distribution Plot')
+
+if show_distribution_plot:
+    # Filter data for the year 2015
+    data_2019 = df[df['year'] == 2019]
+
+    # Create a distribution plot
+    fig = plt.figure(figsize=(10, 5))
+    plt.title("2019 Sale Price Distributions")
+    sb.distplot(data_2019['selling_price'])
+    # Show the distribution plot
+    st.pyplot(fig)
+
 # Overview of data distributions
+
+fig = plt.figure(figsize=(10,6))
 sb.pairplot(df.iloc[:,1:9])
+st.write(fig)
 
 # Train & Test
 percent_to_use = 0.8
