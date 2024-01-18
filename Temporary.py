@@ -19,12 +19,14 @@ st.write('The dataset contains information for predicting the selling price of u
 st.write('The dataset was obtained from Kaggle. The URL for the dataset is https://www.kaggle.com/datasets/nehalbirla/vehicle-dataset-from-cardekho?select=Car+details+v3.csv')
 #Running the data
 
-df = pd.read_csv('C:\\Users\\Lenovo\\Desktop\\Car_details.csv')
+file_path = 'C:\\Users\\Lenovo\\Desktop\\Car_details.csv'
+df = pd.read_csv(file_path)
 print(df)
 
 
 # Basic Information
-st.header('Dataset Information')
+st.header('- Dataset Information')
+
 if st.button('Show Dataset'):
     st.dataframe(df)
 
@@ -32,16 +34,17 @@ print(df.columns)
 print(df.info())
 print(df.head(10))
 # "Selling_Price" will be the dependent variable and the rest of the variables will be considered as independent variables.
-st.write("Selling_Price will be the dependent variable and the rest of the variables will be considered as independent variables.")
-st.sidebar.title('Variables table')
-st.sidebar.write(pd.read_csv('C:\\Users\\Lenovo\\Desktop\\Car_details.csv').iloc[5:,[0,4]].reset_index(drop=True))
+st.write("Selling Price will be the dependent variable and the rest of the variables will be considered as independent variables.")
+st.sidebar.markdown('## Variables Table')
+st.sidebar.write("This table provides information about...")
+st.sidebar.write(df.iloc[5:, [0, 2]].reset_index(drop=True))
 
 # Get the number of rows and columns
 num_rows, num_columns = df.shape
-
+if st.checkbox("Dataset Shape"):
 # Print the number of rows and columns
-st.write(f"Number of rows: {df.shape[0]}")
-st.write(f"Number of columns: {df.shape[1]}")
+    st.write(f"Number of rows: {df.shape[0]}")
+    st.write(f"Number of columns: {df.shape[1]}")
 print(f"Number of rows: {num_rows}")
 
 print(f"Number of columns: {num_columns}")
@@ -57,7 +60,6 @@ show_num_cars = st.checkbox('Number of Cars')
 if show_num_cars:
     num_name = df['name'].value_counts()
     st.write(num_name)
-st.write('A large proportion of cars are Maruti')
 # A large proportion of cars are Maruti
 
 # Splitting the 'name' column into 'brand' and 'model' columns
@@ -75,11 +77,12 @@ df_copyname['brand'] = df_copyname['brand'].apply(lambda x: 'other' if x in firs
 dfbrand_updated = df_copyname['brand'].value_counts().sort_values()
 
 # Create a checkbox to show/hide the pie chart
-show_pie_chart = st.checkbox('Show Pie Chart')
+show_pie_chart = st.checkbox('Cars Proportion Pie Chart')
 if show_pie_chart:
     fig=plt.figure(figsize=(10,6))
     plt.pie(dfbrand_updated, labels=dfbrand_updated.index, radius=1.3, autopct='%0.0f%%', shadow=True)
     st.write(fig)
+st.write('Outcome: A large proportion of cars are Maruti')
 
 
 st.subheader('Numerical stats')
@@ -144,7 +147,7 @@ df_copy.drop(['fuel', 'transmission', 'seller_type'],axis=1, inplace=True)
 
 #drop some unuseful columns in our model
 df_copy = df_copy.drop(columns=['torque','name'],axis=1)
-st.header("Dataset Preprocessing")
+st.header("- Dataset Preprocessing")
 st.write('The data is preprocessed by encoding the target variable into numerical values and converting categorical variables into dummy variables.')
 #outlier Detection
 def detect_outliers(data):
@@ -174,9 +177,8 @@ st.write("Number of Outliers detected in 'engine' column using IQR method:",outl
 outliers_max_power = len(detect_outliers(df['max_power']))
 print("Number of Outliers detected in 'max_power' column using IQR method:", outliers_max_power)
 st.write("Number of Outliers detected in 'max_power' column using IQR method:",outliers_max_power)
-st.header("Data Exploration")
-with st.expander("Detail"):
-    st.write('The target variable and features are plotted to explore data distribution and correlation.')
+st.header("- Data Exploration")
+st.write('The target variable and features are plotted to explore data distribution and correlation.')
 #correlation
 correlation = df_copy.corr()
 print(correlation)
@@ -220,7 +222,7 @@ plt.title("correlation of engine and mileage")
 plt.show()
 
 # Selectbox to choose the plot
-selected_plot = st.selectbox("Select Plot", ["Correlation with Max Power & Engine", "Correlation of Engine and Mileage","Selling Price by Year"])
+selected_plot = st.selectbox("Outcome Visualization", ["Correlation with Max Power & Engine", "Correlation of Engine and Mileage","Selling Price by Year"])
 
 # Plot based on the selection
 if selected_plot == "Correlation with Max Power & Engine":
@@ -287,7 +289,7 @@ for column in numeric_columns:
     plt.ylabel("Values")
     plt.show()
 
-selected_column = st.selectbox("Select Numeric Column", df.select_dtypes(['float64', 'int64']).columns)
+selected_column = st.selectbox("Select The Numeric Column", df.select_dtypes(['float64', 'int64']).columns)
 
 # Button to trigger the visualization
 if st.button(f"Visualize {selected_column}"):
@@ -399,64 +401,94 @@ print('x_test shape', x_test.shape)
 print('y_train shape',y_train.shape)
 print('y_test shape',y_test.shape)
 
+st.header("- Data Modelling")
+st.write('The data is divided into training and testing sets. Then the following models are trained and evaluated:')
+st.write('1. Linear Regression')
+st.write('2. Polynomial Regression')
+
+model_selected = st.selectbox('Select a model:', ['Select one option', 'Linear Regression', 'Polynomial Regression'])
+
+
 # Regression
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import   mean_squared_error
 
-reg= LinearRegression()
-reg.fit(x_train,y_train)
-reg.score(x_test,y_test)
+if model_selected!='Select one option':
+    if model_selected == 'Linear Regression':
+        reg = LinearRegression()
+        reg.fit(x_train, y_train)
+        y_pred = reg.predict(x_test)
+        st.write('R^2: ', reg.score(x_test, y_test))
+        st.write('MSE: ', mean_squared_error(y_test, y_pred))
+        st.write('RMSE: ', np.sqrt(mean_squared_error(y_test, y_pred)))
 
-# Coefficient
-reg.coef_
-# Intercept
-reg.intercept_
 
-# Make predictions on the training set
-prediction=reg.predict(x_train)
-print((prediction))
-# Make predictions on the testing set
-prediction_test= reg.predict(x_test)
-print(prediction_test)
-
-mean_squared_error(y_test,prediction_test)
-np.sqrt(mean_squared_error(y_test,prediction_test))
 
 # Creating Table
-reg_summary = pd.DataFrame(x_train.columns, columns=["Features"])
-reg_summary["Coefficients"] = reg.coef_
-reg_summary["Intercept"] = reg.intercept_
-print(reg_summary)
-
+        reg_summary = pd.DataFrame(x_train.columns, columns=["Features"])
+        reg_summary["Coefficients"] = reg.coef_
+        reg_summary["Intercept"] = reg.intercept_
+        if st.button("Table"):
+            st.table(reg_summary)
 # Plot
-plt.scatter(y_train, prediction, label='Training Data')
-plt.scatter(y_test, prediction_test, label='Testing Data')
-plt.plot([min(y_train), max(y_train)], [min(y_train), max(y_train)], linestyle='--', color='black', label='Regression Line')
-plt.xlabel('Actual Values')
-plt.ylabel('Predicted Values')
-plt.legend()
-plt.show()
+        showplot = st.button("Regression Plot")
+        if showplot:
+            fig=plt.figure(figsize=(10,6))
+            plt.scatter(y_train, prediction, label='Training Data')
+            plt.scatter(y_test, prediction_test, label='Testing Data')
+            plt.plot([min(y_train), max(y_train)], [min(y_train), max(y_train)], linestyle='--', color='black', label='Regression Line')
+            plt.xlabel('Actual Values')
+            plt.ylabel('Predicted Values')
+            plt.legend()
+            st.write(fig)
+
 
 
 # Polynomial Regression
 from sklearn.preprocessing import PolynomialFeatures
+from sklearn.metrics import r2_score
+if model_selected != 'Select one option':
+    if model_selected == "Polynomial Regression":
+        poly = PolynomialFeatures(degree=2)
+        X_train_poly = poly.fit_transform(x_train)
+        X_test_poly = poly.transform(x_test)
 
-poly = PolynomialFeatures(degree=2)
+        # Fit a linear regression model on the polynomial features
+        reg = LinearRegression()
+        reg.fit(X_train_poly, y_train)
+        st.write('R^2: ', reg.score(X_test_poly, y_test))
+        # Get feature names after polynomial transformation
+        poly_feature_names = [f"Feature_{i}" for i in range(X_train_poly.shape[1])]
 
-X_train_poly = poly.fit_transform(x_train)
-X_test_poly = poly.transform(x_test)
+        # Display the summary in a DataFrame
+        if st.button("Sumaary Table"):
+            poly_summary = pd.DataFrame(poly_feature_names, columns=["Features"])
+            poly_summary["Coefficients"] = reg.coef_
+            poly_summary["Intercept"] = reg.intercept_
+            st.table(poly_summary)
+        if st.button("Plot"):
+            y_pred = reg.predict(X_test_poly)
+            fig, ax = plt.subplots()
+            ax.scatter(y_test, y_pred)
+            ax.plot([min(y_test), max(y_test)], [min(y_test), max(y_test)], linestyle='--', color='red',
+                    linewidth=2)  # Diagonal line for reference
+            ax.set_xlabel('Actual Values')
+            ax.set_ylabel('Predicted Values')
+            ax.set_title('Actual vs. Predicted Values for Polynomial Regression')
 
-# Fit a linear regression model on the polynomial features
-model_2 = LinearRegression()
-model_2.fit(X_train_poly, y_train)
+            # Display the R^2 score on the plot
+            r2 = r2_score(y_test, y_pred)
+            st.write(f'R^2 Score: {r2}')
 
-model_2.score(X_train_poly,y_train) #0.85
-
-y_train_pred = model_2.predict(X_train_poly)
-
-y_test_pred = model_2.predict(X_test_poly)
+            # Display the plot in Streamlit
+            st.pyplot(fig)
 
 from sklearn.pipeline import make_pipeline
+model = make_pipeline(PolynomialFeatures(2), LinearRegression())
+model.fit(x_train, y_train)
+y_pred = model.predict(x_test)
+# Calculate and display the R^2 score
+r2_score = model.score(x_test, y_test)
 model = make_pipeline(PolynomialFeatures(2), LinearRegression())
 model.fit(x_train, y_train)
 y_pred = model.predict(x_test)
@@ -469,3 +501,5 @@ plt.xlabel("Actual Prices")
 plt.ylabel("Predicted Prices")
 plt.title("Actual Prices vs Predicted Prices")
 plt.show()
+
+
