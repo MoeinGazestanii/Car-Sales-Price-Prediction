@@ -12,7 +12,6 @@ st.set_page_config(
 )
 st.image('buying-a-used-car.jpg',width=500)
 
-
 st.title('Used Cars Project')
 st.write('The dataset contains information for predicting the selling price of used cars based on various factors such as mileage, engine power, number of seats, number of previous owners, and more. ')
 st.write('The dataset was obtained from Kaggle. The URL for the dataset is https://www.kaggle.com/datasets/nehalbirla/vehicle-dataset-from-cardekho?select=Car+details+v3.csv')
@@ -60,11 +59,9 @@ if show_num_cars:
     num_name = df['name'].value_counts()
     st.write(num_name)
 # A large proportion of cars are Maruti
-
 df_copyname= df.copy()
 df_copyname[['brand', 'model']] = df['name'].str.split(' ', n=1, expand=True)
 print(df_copyname)
-
 print(df_copyname['brand'].value_counts())
 
 dfbrand = df_copyname['brand'].value_counts().sort_values()
@@ -81,18 +78,14 @@ if show_pie_chart:
     st.write(fig)
 st.write('Outcome: A large proportion of cars are Maruti')
 
-
 st.subheader('Numerical stats')
-
 #numerical stats
 print(df.describe())
-
 if st.button('Describe'):
     st.write(df.describe())
 
 #missing values
 print(df.isna().sum())
-
 
 st.subheader("Missing Values")
 def PercentageofMissingData(dataset):
@@ -101,7 +94,6 @@ def PercentageofMissingData(dataset):
 if st.checkbox("Percentage of Missing values"):
     st.write(PercentageofMissingData(df))
 st.text('At most two percent of a variable contains missing values')
-
 
 df.dropna(inplace=True, axis=0)
 st.subheader("Dublicated rows")
@@ -143,7 +135,6 @@ print(df_copy.head())
 
 # Drop original columns
 df_copy.drop(['fuel', 'transmission', 'seller_type'],axis=1, inplace=True)
-
 #drop some unuseful columns in our model
 df_copy = df_copy.drop(columns=['torque','name'],axis=1)
 
@@ -203,23 +194,6 @@ with st.expander("Outcome"):
     st.write('- There is a strong positive correlation between the maximum  power of the car and our dependent variable selling price. so it is probably very effective in our model.')
     st.write('- By correlation, year and engine would be other important factors in selling price.')
 
-# correlation of selling price with max power & engine plot
-plt.figure(figsize=(10,6))
-plt.scatter(df_copy['max_power'], df_copy['selling_price'],label="Max Power")
-plt.scatter(df_copy['engine'], df_copy['selling_price'],label="Engine")
-plt.xlabel("max power & engine")
-plt.ylabel("selling price")
-plt.title("correlation of selling price with max power & engine")
-plt.legend()
-plt.show()
-
-# correlation of engine and mileage plot
-plt.figure(figsize=(10, 6))
-plt.scatter(df_copy['engine'], df_copy['mileage'])
-plt.xlabel("engine")
-plt.ylabel("mileage")
-plt.title("correlation of engine and mileage")
-plt.show()
 
 # Selectbox to choose the plot
 selected_plot = st.selectbox("Outcome Visualization", ["Correlation with Max Power & Engine", "Correlation of Engine and Mileage","Selling Price by Year"])
@@ -250,13 +224,6 @@ elif selected_plot == "Selling Price by Year":
         price_order = df_copy.groupby('year')['selling_price'].mean().sort_values(ascending=False).index.values
         sb.boxplot(data=df_copy, x='year', y='selling_price', order=price_order)
         st.write(fig)
-
-# Selling price of cars by year
-fig = plt.figure(figsize=(10, 20))
-plt.title('Selling price of cars by year')
-price_order = df.groupby('year')['selling_price'].mean().sort_values(ascending=False).index.values
-sb.boxplot(data=df, x='year', y='selling_price', order=price_order)
-
 
 st.subheader("Visualization of int and float columns")
 # Visualization of int and float columns
@@ -349,9 +316,8 @@ if st.button(f"Visualize Frequency of {selected_column}"):
 show_distribution_plot = st.checkbox('Show 2019 Sale Price Distribution Plot')
 
 if show_distribution_plot:
-    # Filter data for the year 2015
+    # Filter data for the year 2019
     data_2019 = df[df['year'] == 2019]
-
     fig = plt.figure(figsize=(10, 5))
     plt.title("2019 Sale Price Distributions")
     sb.distplot(data_2019['selling_price'])
@@ -379,7 +345,6 @@ st.write('2. Polynomial Regression')
 
 model_selected = st.selectbox('Select a model:', ['Select one option', 'Linear Regression', 'Polynomial Regression'])
 
-
 # Regression
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import   mean_squared_error
@@ -392,8 +357,6 @@ if model_selected!='Select one option':
         st.write('R^2: ', reg.score(x_test, y_test))
         st.write('MSE: ', mean_squared_error(y_test, y_pred))
         st.write('RMSE: ', np.sqrt(mean_squared_error(y_test, y_pred)))
-
-
 
 # Creating Table
         reg_summary = pd.DataFrame(x_train.columns, columns=["Features"])
@@ -413,7 +376,6 @@ if model_selected!='Select one option':
             plt.ylabel('Predicted Values')
             plt.legend()
             st.write(fig)
-
 
 
 # Polynomial Regression
