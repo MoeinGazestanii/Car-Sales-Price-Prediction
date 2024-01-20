@@ -17,7 +17,7 @@ st.write('The dataset contains information for predicting the selling price of u
 st.write('The dataset was obtained from Kaggle. The URL for the dataset is https://www.kaggle.com/datasets/nehalbirla/vehicle-dataset-from-cardekho?select=Car+details+v3.csv')
 #Running the data
 
-file_path = 'C:\\Users\\Lenovo\\Desktop\\Car_details.csv'
+file_path = 'Car_details.csv'
 df = pd.read_csv(file_path)
 print(df)
 
@@ -98,8 +98,8 @@ st.text('At most two percent of a variable contains missing values')
 df.dropna(inplace=True, axis=0)
 st.subheader("Dublicated rows")
 # Dublicated rows
+st.write("Number of duplicated rows that is in dataset and should be excluded:", df.duplicated().sum())
 df.drop_duplicates(inplace=True)
-st.write("Number of duplicated rows that is in dataset and should be excluded:", len(df.duplicated()))
 
 #Data Preprocessing----------------------------------------------------------------------------------------
 def change(data, columns, string_to_replace, replacement):
@@ -393,7 +393,7 @@ if model_selected != 'Select one option':
         poly_feature_names = [f"Feature_{i}" for i in range(X_train_poly.shape[1])]
 
         # Display the summary in a DataFrame
-        if st.button("Sumaary Table"):
+        if st.button("Summary Table"):
             poly_summary = pd.DataFrame(poly_feature_names, columns=["Features"])
             poly_summary["Coefficients"] = reg.coef_
             poly_summary["Intercept"] = reg.intercept_
@@ -407,6 +407,6 @@ if model_selected != 'Select one option':
             ax.set_xlabel('Actual Values')
             ax.set_ylabel('Predicted Values')
             ax.set_title('Actual vs. Predicted Values for Polynomial Regression')
-            r2 = r2_score(y_test, y_pred)
-            st.write(f'R^2 Score: {r2}')
+            # r2 = r2_score(y_test, y_pred)
+            # st.write(f'R^2 Score: {r2}')
             st.write(fig)
