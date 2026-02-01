@@ -22,3 +22,6 @@ I have selected a dataset on used cars, comprising 13 variables, to develop a pr
 
     Model Evaluation:
     Assess model performance using appropriate metrics (e.g., R², RMSE, MAE) to ensure accuracy and reliability.
+
+---
+**Author:** Moein Gazestani
